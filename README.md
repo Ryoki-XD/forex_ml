@@ -2,83 +2,87 @@
 
 ![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
 ![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Robot?style=for-the-badge&color=blue)
-![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
+![MetaTrader 5](https://img.shields.io/badge/MetaTrader5-Integration-black?style=for-the-badge)
 
-O **Forex ML Bot** é uma ferramenta de automação de trading que utiliza modelos de **Machine Learning** para prever movimentos no mercado de moedas. O sistema analisa indicadores técnicos e dados históricos para tomar decisões de entrada e saída de forma inteligente e sem viés emocional.
-
----
-
-## 🛠️ Tecnologias Utilizadas
-
-* **Linguagem:** Python (Core do sistema)
-* **Data Science:** `Pandas` e `NumPy` para processamento de dados.
-* **IA:** `Scikit-Learn` / `XGBoost` para modelagem preditiva.
-* **Broker:** `MetaTrader5 API` para execução de ordens em tempo real.
+O **Forex ML Bot** é um sistema modular de automação de trading que utiliza **Machine Learning** para prever movimentações no mercado financeiro (foco no par EUR/USD). O bot abrange todo o pipeline de dados: desde a coleta no MetaTrader 5, engenharia de features, treinamento e otimização do modelo, até a execução de ordens em tempo real.
 
 ---
 
-## 📂 Estrutura do Projeto
+## 📂 Arquitetura do Projeto
 
-| Arquivo/Pasta | Descrição |
-| :--- | :--- |
-| `data/` | Bases históricas em CSV/JSON (OHLC). |
-| `models/` | Arquivos de modelos treinados (`.pkl` ou `.h5`). |
-| `logs/` | Registros detalhados de operações, erros e performance. |
-| `main.py` | Ponto de entrada. Executa o loop de trading em tempo real. |
-| `train.py` | Script para extração de features e treinamento da IA. |
-| `config.py` | Centralização de credenciais e parâmetros de risco. |
-| `requirements.txt` | Lista de dependências para o ambiente Python. |
+A estrutura foi desenhada para separar claramente as responsabilidades de Data Science e de Engenharia de Software:
+
+###  Modelagem e Dados
+* `coletar_dados.py` — Extrai o histórico de preços (OHLCV) direto do MT5.
+* `preparar_dados.py` — Realiza a limpeza e *Feature Engineering* (criação de indicadores técnicos).
+* `treinar_modelo.py` — Treina o algoritmo de Machine Learning com a base tratada.
+* `otimizar_modelo.py` — Realiza o *Tuning* de hiperparâmetros para buscar a melhor performance.
+* `backtester.py` — Valida a estratégia simulando operações no passado.
+
+###  Execução e Conectividade
+* `conexao_mt5.py` — Módulo responsável por gerenciar o login e a estabilidade com a corretora.
+* `executor_mt5.py` — **[PONTO DE ENTRADA]** O script principal que coloca o bot para rodar em tempo real, lendo os sinais do modelo e enviando ordens.
+
+###  Artefatos
+* `*.csv` — Bases de treino, dados brutos e diário de trades.
+* `*.pkl` — Modelos já treinados e prontos para uso (ex: `super_cerebro_eurusd_m15.pkl`).
 
 ---
 
 ## 🔧 Configuração e Instalação
 
-### 1. Requisitos
-Certifique-se de ter o **Python 3.8+** instalado e o terminal do **MetaTrader 5** configurado no seu computador.
+### 1. Pré-requisitos
+Certifique-se de ter o **Python 3.8+** instalado e o terminal do **MetaTrader 5** logado na sua conta no mesmo computador.
 
-### 2. Instalação
-Clone este repositório e instale as bibliotecas necessárias:
+### 2. Clonando e Preparando o Ambiente
+Recomenda-se o uso do ambiente virtual (`venv`) que já está mapeado no projeto.
 
     git clone https://github.com/seu-usuario/forex_ml.git
     cd forex_ml
+    .\venv\Scripts\activate
     pip install -r requirements.txt
 
 ### 3. Credenciais
-Abra o arquivo `config.py` (ou use um arquivo `.env`) e insira seus dados da corretora:
-* **MT5_LOGIN:** Seu número da conta.
-* **MT5_PASSWORD:** Sua senha de negociação.
-* **MT5_SERVER:** O servidor da sua corretora.
+As credenciais da corretora devem ser gerenciadas de forma segura. Certifique-se de configurar o arquivo responsável pela conexão (ajuste no código do `conexao_mt5.py` ou via `.env`, caso utilize).
 
 ---
 
-## 📈 Como Utilizar
+## 🚀 Como Utilizar (Pipeline Completo)
 
-### Passo 1: Treinamento
-Para que o bot aprenda com o passado, rode o script de treinamento:
+Se você quiser treinar um modelo do zero para um novo ativo ou *timeframe*:
 
-    python train.py
+1. **Baixar os dados:**
 
-*Isso vai gerar um arquivo na pasta `/models/` que o bot usará para decidir as entradas.*
+    python coletar_dados.py
 
-### Passo 2: Execução
-Para colocar o bot para rodar (em modo leitura ou execução):
+2. **Criar as features e formatar a base:**
 
-    python main.py
+    python preparar_dados.py
+
+3. **Treinar e/ou Otimizar:**
+
+    python treinar_modelo.py
+    python otimizar_modelo.py
+
+### 🟢 Iniciando as Operações (Live Trading)
+Para rodar o bot no mercado ao vivo, utilizando o modelo já salvo:
+
+    python executor_mt5.py
 
 ---
 
 ## ⚠️ Aviso Legal (Disclaimer)
 
 > [!IMPORTANT]
-> **NEGOCIAR NO MERCADO FOREX ENVOLVE RISCO ALTO.**
+> **NEGOCIAR NO MERCADO FOREX ENVOLVE ALTO RISCO DE PERDA.**
 > 
-> Este software foi desenvolvido para fins de estudo e automação técnica. O desenvolvedor **não se responsabiliza** por quaisquer perdas financeiras. 
+> Este software foi desenvolvido estritamente para fins acadêmicos e de automação técnica. O desenvolvedor **não se responsabiliza** por quaisquer perdas financeiras. 
 > 
-> * Nunca opere um capital que você não pode perder.
-> * Sempre valide sua estratégia em uma **Conta Demo** por pelo menos 4 semanas antes de usar capital real.
+> * Nunca opere um capital que você não está disposto a perder.
+> * Sempre valide seus próprios modelos (usando o `backtester.py`) e opere inicialmente em uma **Conta Demo**.
 
 ---
 
 ## 👨‍💻 Desenvolvedor
 
-**Lucas Diniz de Abreu** *Estudante de Engenharia de Software* [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lucas-diniz-411705266/)
+**Lucas Diniz de Abreu** *Estudante de Engenharia de Software — UniEVANGÉLICA* [![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/lucas-diniz-411705266/) 
