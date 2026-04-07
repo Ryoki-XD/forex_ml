@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+venv/
+.vscode/
+# Não suba arquivos de dados gigantes se tiverem GBs
+data/*.csv
